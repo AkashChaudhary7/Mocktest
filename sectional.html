@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sectional Mocks</title>
+    <title>Mains Mocks</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -31,8 +31,15 @@
 <body class="min-h-screen">
     <div class="container mx-auto px-4 py-8">
         <header class="mb-8">
-            <h1 class="text-3xl font-bold text-indigo-600">Sectional Mocks</h1>
-            <p class="text-gray-600">List of all section-wise practice tests</p>
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3zl font-bold text-indigo-600">Prelims Mocks</h1>
+                    <p class="text-gray-600">List of all preliminary examination tests</p>
+                </div>
+                <a href="index.html" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg">
+                    Back to Home
+                </a>
+            </div>
         </header>
 
         <div class="bg-white rounded-lg shadow p-6">
@@ -58,20 +65,26 @@
     </div>
 
     <script>
+        // Initialize with current category
+        const category = 'mains';
+        
         // Load mock data
-        const mockData = JSON.parse(localStorage.getItem('mockData')) || { sectional: [] };
+        // Initialize storage for this category only
+        const mockData = {
+            [category]: JSON.parse(localStorage.getItem(`mockData_${category}`)) || []
+        };
         
         // Display mocks
         function displayMocks() {
             const container = document.getElementById('mocks-list');
             container.innerHTML = '';
             
-            if (mockData.sectional.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 py-4">No mocks available in sectional folder.</p>';
+            if (mockData[category].length === 0) {
+                container.innerHTML = `<p class="text-gray-500 py-4">No mocks available in ${category} folder.</p>`;
                 return;
             }
             
-            mockData.sectional.forEach(mock => {
+            mockData[category].forEach(mock => {
                 const mockEl = document.createElement('div');
                 mockEl.className = `mock-item p-3 rounded ${mock.attempted ? 'attempted' : 'not-attempted'}`;
                 mockEl.innerHTML = `
@@ -82,11 +95,11 @@
                                 ${mock.attempted ? 'Attempted' : 'Not Attempted'}
                             </span>
                             <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium mr-2" 
-                                    onclick="openMock('${mock.name}', 'sectional')">
+                                    onclick="openMock('${mock.name}', '${category}')">
                                 Open
                             </button>
                             <button class="text-red-600 hover:text-red-800 text-sm font-medium" 
-                                    onclick="deleteMock('${mock.name}', 'sectional')">
+                                    onclick="deleteMock('${mock.name}', '${category}')">
                                 Delete
                             </button>
                         </div>
@@ -97,7 +110,7 @@
         }
         
         // Open mock in new tab
-       function openMock(name, category) {
+        function openMock(name, category) {
             const mock = mockData[category].find(m => m.name === name);
             if (mock && mock.content) {
                 const shouldReattempt = mock.attempted && confirm("You've already attempted this mock. Reattempt?");
@@ -106,7 +119,7 @@
                     window.open(URL.createObjectURL(blob), '_blank');
                     mock.lastViewed = new Date().toISOString().split('T')[0];
                     mock.attempted = true;
-                    localStorage.setItem('mockData', JSON.stringify(mockData));
+                    localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
                     displayMocks();
                 }
             } else {
@@ -125,15 +138,13 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 const fileContent = e.target.result;
-                const mockUrl = URL.createObjectURL(new Blob([fileContent], {type: 'text/html'}));
-                
-                mockData.sectional.push({
+                mockData[category].push({
                     name: mockName,
                     content: fileContent,
                     attempted: false,
                     lastViewed: null
                 });
-                localStorage.setItem('mockData', JSON.stringify(mockData));
+                localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
                 displayMocks();
                 alert("Mock uploaded successfully!");
             };
@@ -151,11 +162,11 @@
             const statusFilter = document.getElementById('filter-status').value;
             container.innerHTML = '';
             
-            let filteredMocks = mockData.sectional;
+            let filteredMocks = mockData[category];
             if (statusFilter === 'attempted') {
-                filteredMocks = mockData.sectional.filter(m => m.attempted);
+                filteredMocks = mockData[category].filter(m => m.attempted);
             } else if (statusFilter === 'not-attempted') {
-                filteredMocks = mockData.sectional.filter(m => !m.attempted);
+                filteredMocks = mockData[category].filter(m => !m.attempted);
             }
             
             if (filteredMocks.length === 0) {
@@ -174,11 +185,11 @@
                                 ${mock.attempted ? 'Attempted' : 'Not Attempted'}
                             </span>
                             <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium mr-2" 
-                                    onclick="openMock('${mock.name}', 'sectional')">
+                                    onclick="openMock('${mock.name}', '${category}')">
                                 Open
                             </button>
                             <button class="text-red-600 hover:text-red-800 text-sm font-medium" 
-                                    onclick="deleteMock('${mock.name}', 'sectional')">
+                                    onclick="deleteMock('${mock.name}', '${category}')">
                                 Delete
                             </button>
                         </div>
@@ -202,4 +213,3 @@
     </script>
 </body>
 </html>
-
