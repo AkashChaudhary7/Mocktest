@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prelims Mocks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f9;
+        }
+        
+        .mock-item {
+            transition: all 0.2s ease;
+        }
+        
+        .mock-item:hover {
+            background-color: #e2e8f0;
+        }
+        
+        .attempted {
+            border-left: 4px solid #10b981;
+        }
+        
+        .not-attempted {
+            border-left: 4px solid #f59e0b;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-indigo-600">Prelims Mocks</h1>
+            <p class="text-gray-600">List of all preliminary examination mocks</p>
+        </header>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Available Mocks</h2>
+                <button id="upload-mock" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+                    Upload New Mock
+                </button>
+            </div>
+            
+            <div id="mocks-list" class="space-y-2">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load mock data
+        const mockData = JSON.parse(localStorage.getItem('mockData')) || { prelims: [] };
+        
+        // Display mocks
+        function displayMocks() {
+            const container = document.getElementById('mocks-list');
+            container.innerHTML = '';
+            
+            if (mockData.prelims.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 py-4">No mocks available in prelims folder.</p>';
+                return;
+            }
+            
+            mockData.prelims.forEach(mock => {
+                const mockEl = document.createElement('div');
+                mockEl.className = `mock-item p-3 rounded ${mock.attempted ? 'attempted' : 'not-attempted'}`;
+                mockEl.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span>${mock.name}</span>
+                        <div>
+                            <span class="text-sm ${mock.attempted ? 'text-green-500' : 'text-amber-500'} mr-4">
+                                ${mock.attempted ? 'Attempted' : 'Not Attempted'}
+                            </span>
+                            <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium" 
+                                    onclick="openMock('${mock.name}', 'prelims')">
+                                Open
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(mockEl);
+            });
+        }
+        
+        // Open mock in new tab
+        function openMock(name, category) {
+            // In a real app, this would open the actual mock file
+            alert(`Opening ${name} from ${category} folder in new tab`);
+            
+            // Update last viewed date
+            const mock = mockData[category].find(m => m.name === name);
+            if (mock) {
+                mock.lastViewed = new Date().toISOString().split('T')[0];
+                mock.attempted = true;
+                localStorage.setItem('mockData', JSON.stringify(mockData));
+                displayMocks();
+            }
+        }
+        
+        // Upload new mock (simulated)
+        document.getElementById('upload-mock').addEventListener('click', function() {
+            const mockName = prompt("Enter mock name:");
+            if (mockName) {
+                mockData.prelims.push({
+                    name: mockName,
+                    attempted: false,
+                    lastViewed: null
+                });
+                localStorage.setItem('mockData', JSON.stringify(mockData));
+                displayMocks();
+                alert("Mock uploaded successfully!");
+            }
+        });
+        
+        // Initialize
+        displayMocks();
+    </script>
+</body>
+</html>
+
