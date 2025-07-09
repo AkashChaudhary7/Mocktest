@@ -1,3 +1,13 @@
+These changes will:
+1. Fix the broken IndexedDB storage function
+2. Remove duplicate code in openMock
+3. Properly handle promise chains in file uploads
+4. Ensure transactions complete before continuing
+5. Add proper error handling for all IndexedDB operations
+
+Would you like me to explain any of these changes in more detail before applying them?Here is the updated HTML content after applying above edits:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,10 +93,14 @@
         }
         
         function storeMockInIndexedDB(id, content) {
-            openDB().then(db => {
+            return openDB().then(db => {
+=======
                 const transaction = db.transaction('mocks', 'readwrite');
                 const store = transaction.objectStore('mocks');
-                store.put(content, id);
+                });
+        }
+=======
+=======
             });
         }
         
@@ -154,11 +168,19 @@
                     getMockFromIndexedDB(mock.id).then(content => {
                         const blob = new Blob([content], {type: 'text/html'});
                         window.open(URL.createObjectURL(blob), '_blank');
+                        mock.attempted = true;
+                    localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
+                    displayMocks();
+=======
+=======
+                    mock.attempted = true;
+                    localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
+                    displayMocks();
+                    });
                     mock.lastViewed = new Date().toISOString();
                     mock.attempted = true;
                     localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
                     displayMocks();
-                    displayLatestViewed();
                 }
             } else {
                 alert(`Error: Could not find mock file ${name}`);
@@ -187,14 +209,20 @@
                     });
                     
                     // Store file content in IndexedDB instead of localStorage
-                    storeMockInIndexedDB(mockId, fileContent);
-                    
-                    filesProcessed++;
-                    if (filesProcessed === files.length) {
-                        localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
-                        displayMocks();
-                        alert(`${files.length} mocks uploaded successfully!`);
+                    storeMockInIndexedDB(mockId, fileContent)
+                        .then(() => {
+                            filesProcessed++;
+                            if (filesProcessed === files.length) {
+=======
+                        try {
+                            localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
+                            displayMocks();
+                            alert(`${files.length} mocks uploaded successfully!`);
+                        } catch (e) {
+                            alert(`Error saving mock data: ${e.message}`);
+                        }
                     }
+=======
                 };
                 reader.readAsText(file);
             });
