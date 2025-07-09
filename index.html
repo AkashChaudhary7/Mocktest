@@ -66,18 +66,21 @@
         <!-- Main Content -->
         <main class="container mx-auto px-4 py-8">
             <!-- Dashboard Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Total Mocks</h3>
-                    <p class="text-3xl font-bold text-indigo-600" id="total-mocks">0</p>
-                </div>
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Attempted</h3>
-                    <p class="text-3xl font-bold text-green-500" id="attempted-mocks">0</p>
-                </div>
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Pending</h3>
-                    <p class="text-3xl font-bold text-amber-500" id="pending-mocks">0</p>
+            <div class="bg-white rounded-lg shadow p-6 mb-8">
+                <h3 class="text-lg font-medium mb-4">Mock Test Dashboard</h3>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-indigo-50 p-4 rounded">
+                        <div class="text-indigo-600 font-bold" id="total-mocks">0</div>
+                        <div class="text-sm">Total Mocks</div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded">
+                        <div class="text-green-600 font-bold" id="attempted-mocks">0</div>
+                        <div class="text-sm">Attempted</div>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded">
+                        <div class="text-amber-600 font-bold" id="pending-mocks">0</div>
+                        <div class="text-sm">Pending</div>
+                    </div>
                 </div>
             </div>
 
@@ -144,19 +147,15 @@
         });
 
         // Mock data - in a real app, this would come from a database or API
-        let mockData = {
-            prelims: [
-                { name: "Geography Mock 1", attempted: true, lastViewed: "2023-10-15" },
-                { name: "History Mock 2", attempted: false, lastViewed: "2023-10-10" }
-            ],
-            mains: [
-                { name: "Essay Writing Practice", attempted: true, lastViewed: "2023-10-12" },
-                { name: "GS Paper 1 Mock", attempted: false, lastViewed: null }
-            ],
-            : [
-                { name: "Quantitative Aptitude", attempted: true, lastViewed: "2023-10-05" },
-                { name: "Logical Reasoning", attempted: false, lastViewed: null }
-            ]
+        const mockData = {
+            prelims: JSON.parse(localStorage.getItem('mockData_prelims')) || [],
+            mains: JSON.parse(localStorage.getItem('mockData_mains')) || [],
+            sectional: JSON.parse(localStorage.getItem('mockData_sectional')) || [],
+            stats: JSON.parse(localStorage.getItem('mockStats')) || {
+                total: 0,
+                attempted: 0,
+                pending: 0
+            }
         };
 
         // Calculate statistics
