@@ -66,11 +66,6 @@
     <script>
         // Maximum mock files to store
         const MAX_MOCKS = 2000;
-        
-        const transaction = db.transaction('mocks', 'readwrite');
-                const store = transaction.objectStore('mocks');
-                });
-        }
  
             });
  
@@ -202,9 +197,9 @@
                     }
                     
                     mockData[category].push({
-                        name: mockName,
+                        name: file.name.replace('.html', ''),
                         path: URL.createObjectURL(new Blob([fileContent], {type: 'text/html'})),
-                        attempted: false, 
+                        attempted: false,
                         lastViewed: null
                     });
                     
