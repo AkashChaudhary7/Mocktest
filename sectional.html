@@ -66,6 +66,7 @@
     <script>
         const category = 'sectional';
         const MAX_MOCKS = 2000;
+        const GITHUB_PAGES_URL = 'https://akashchaudhary7.github.io/mockss/'; // Replace with your GitHub Pages URL
 
         // Load mock data from localStorage
         const mockData = {
@@ -93,11 +94,11 @@
                                 ${mock.attempted ? 'Attempted' : 'Not Attempted'}
                             </span>
                             <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium mr-2" 
-                                    onclick="openMock('${mock.name}')">
+                                    onclick="openMock('${mock.name}')" aria-label="Open ${mock.name}">
                                 Open
                             </button>
                             <button class="text-red-600 hover:text-red-800 text-sm font-medium" 
-                                    onclick="deleteMock('${mock.name}')">
+                                    onclick="deleteMock('${mock.name}')" aria-label="Delete ${mock.name}">
                                 Delete
                             </button>
                         </div>
@@ -111,13 +112,7 @@
         function openMock(name) {
             const mock = mockData[category].find(m => m.name === name);
             if (mock) {
-                const shouldReattempt = mock.attempted && confirm("You've already attempted this mock. Reattempt?");
-                if (!mock.attempted || shouldReattempt) {
-                    window.open(mock.path, '_blank');
-                    mock.attempted = true;
-                    localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
-                    displayMocks();
-                }
+                window.open(mock.path, '_blank'); // Open the GitHub Pages URL
             } else {
                 alert(`Error: Could not find mock file ${name}`);
             }
@@ -131,42 +126,29 @@
             let filesProcessed = 0;
 
             Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const fileContent = e.target.result;
-                    const mockName = file.name.replace('.html', '');
+                const mockName = file.name.replace('.html', '');
+                const mockPath = `${GITHUB_PAGES_URL}${file.name}`; // Construct the URL
 
-                    if (mockData[category].length >= MAX_MOCKS) {
-                        alert(`Maximum ${MAX_MOCKS} mocks reached. Delete some to add more.`);
-                        return;
-                    }
+                mockData[category].push({
+                    name: mockName,
+                    path: mockPath, // Use the GitHub Pages URL
+                    attempted: false,
+                    lastViewed: null
+                });
 
-                    mockData[category].push({
-                        name: mockName,
-                        path: URL.createObjectURL(new Blob([fileContent], {type: 'text/html'})),
-                        attempted: false,
-                        lastViewed: null
-                    });
+                localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
+                filesProcessed++;
 
-                    localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
-                    filesProcessed++;
-
-                    if (filesProcessed === files.length) {
-                        displayMocks();
-                        alert(`${files.length} mocks uploaded successfully!`);
-                    }
-                };
-                reader.readAsText(file);
+                if (filesProcessed === files.length) {
+                    displayMocks();
+                    alert(`${files.length} mocks uploaded successfully!`);
+                }
             });
         });
 
         // Delete mock
         function deleteMock(name) {
             if (confirm(`Are you sure you want to delete "${name}"?`)) {
-                const mockToDelete = mockData[category].find(m => m.name === name);
-                if (mockToDelete && mockToDelete.path) {
-                    URL.revokeObjectURL(mockToDelete.path);
-                }
                 mockData[category] = mockData[category].filter(m => m.name !== name);
                 localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
                 displayMocks();
