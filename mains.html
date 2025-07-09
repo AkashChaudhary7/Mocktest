@@ -31,8 +31,15 @@
 <body class="min-h-screen">
     <div class="container mx-auto px-4 py-8">
         <header class="mb-8">
-            <h1 class="text-3xl font-bold text-indigo-600">Sectional Mocks</h1>
-            <p class="text-gray-600">List of all section-wise practice tests</p>
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3zl font-bold text-indigo-600">Mains Mocks</h1>
+                    <p class="text-gray-600">List of all main examination tests</p>
+                </div>
+                <a href="index.html" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg">
+                    Back to Home
+                </a>
+            </div>
         </header>
 
         <div class="bg-white rounded-lg shadow p-6">
@@ -59,19 +66,23 @@
 
     <script>
         // Load mock data
-        const mockData = JSON.parse(localStorage.getItem('mockData')) || { sectional: [] };
+        const mockData = JSON.parse(localStorage.getItem('mockData')) || { 
+            prelims: [],
+            mains: [],
+            sectional: [] 
+        };
         
         // Display mocks
         function displayMocks() {
             const container = document.getElementById('mocks-list');
             container.innerHTML = '';
             
-            if (mockData.sectional.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 py-4">No mocks available in sectional folder.</p>';
+            if (mockData.mains.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 py-4">No mocks available in mains folder.</p>';
                 return;
             }
             
-            mockData.sectional.forEach(mock => {
+            mockData[category].forEach(mock => {
                 const mockEl = document.createElement('div');
                 mockEl.className = `mock-item p-3 rounded ${mock.attempted ? 'attempted' : 'not-attempted'}`;
                 mockEl.innerHTML = `
@@ -82,11 +93,11 @@
                                 ${mock.attempted ? 'Attempted' : 'Not Attempted'}
                             </span>
                             <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium mr-2" 
-                                    onclick="openMock('${mock.name}', 'sectional')">
+                                    onclick="openMock('${mock.name}', 'mains')">
                                 Open
                             </button>
                             <button class="text-red-600 hover:text-red-800 text-sm font-medium" 
-                                    onclick="deleteMock('${mock.name}', 'sectional')">
+                                    onclick="deleteMock('${mock.name}', 'mains')">
                                 Delete
                             </button>
                         </div>
@@ -126,7 +137,7 @@
                 const fileContent = e.target.result;
                 const mockUrl = URL.createObjectURL(new Blob([fileContent], {type: 'text/html'}));
                 
-                mockData.sectional.push({
+                mockData.mains.push({
                     name: mockName,
                     path: mockUrl,
                     attempted: false,
@@ -150,11 +161,11 @@
             const statusFilter = document.getElementById('filter-status').value;
             container.innerHTML = '';
             
-            let filteredMocks = mockData.sectional;
+            let filteredMocks = mockData.mains;
             if (statusFilter === 'attempted') {
-                filteredMocks = mockData.sectional.filter(m => m.attempted);
+                filteredMocks = mockData.mains.filter(m => m.attempted);
             } else if (statusFilter === 'not-attempted') {
-                filteredMocks = mockData.sectional.filter(m => !m.attempted);
+                filteredMocks = mockData.mains.filter(m => !m.attempted);
             }
             
             if (filteredMocks.length === 0) {
@@ -201,3 +212,4 @@
     </script>
 </body>
 </html>
+
