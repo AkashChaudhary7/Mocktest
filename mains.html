@@ -64,6 +64,43 @@
     </div>
 
     <script>
+        // IndexedDB setup
+        const dbName = 'MockTestsDB';
+        const dbVersion = 1;
+        
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(dbName, dbVersion);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('mocks')) {
+                        db.createObjectStore('mocks');
+                    }
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+        
+        function storeMockInIndexedDB(id, content) {
+            openDB().then(db => {
+                const transaction = db.transaction('mocks', 'readwrite');
+                const store = transaction.objectStore('mocks');
+                store.put(content, id);
+            });
+        }
+        
+        function getMockFromIndexedDB(id) {
+            return new Promise((resolve) => {
+                openDB().then(db => {
+                    const transaction = db.transaction('mocks', 'readonly');
+                    const store = transaction.objectStore('mocks');
+                    const request = store.get(id);
+                    request.onsuccess = () => resolve(request.result || '');
+                });
+            });
+        }
+        
         // Initialize with current category
         const category = 'mains';
         
@@ -111,15 +148,17 @@
         // Open mock in new tab
         function openMock(name, category) {
             const mock = mockData[category].find(m => m.name === name);
-            if (mock && mock.content) {
+            if (mock) {
                 const shouldReattempt = mock.attempted && confirm("You've already attempted this mock. Reattempt?");
                 if (!mock.attempted || shouldReattempt) {
-                    const blob = new Blob([mock.content], {type: 'text/html'});
-                    window.open(URL.createObjectURL(blob), '_blank');
-                    mock.lastViewed = new Date().toISOString().split('T')[0];
+                    getMockFromIndexedDB(mock.id).then(content => {
+                        const blob = new Blob([content], {type: 'text/html'});
+                        window.open(URL.createObjectURL(blob), '_blank');
+                    mock.lastViewed = new Date().toISOString();
                     mock.attempted = true;
                     localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
                     displayMocks();
+                    displayLatestViewed();
                 }
             } else {
                 alert(`Error: Could not find mock file ${name}`);
@@ -137,12 +176,18 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const fileContent = e.target.result;
+                    const mockName = file.name.replace('.html', '');
+                    const mockId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+                    
                     mockData[category].push({
-                        name: file.name.replace('.html', ''),
-                        content: fileContent,
+                        id: mockId,
+                        name: mockName,
                         attempted: false,
                         lastViewed: null
                     });
+                    
+                    // Store file content in IndexedDB instead of localStorage
+                    storeMockInIndexedDB(mockId, fileContent);
                     
                     filesProcessed++;
                     if (filesProcessed === files.length) {
@@ -206,8 +251,18 @@
         // Delete mock
         function deleteMock(name, category) {
             if (confirm(`Are you sure you want to delete "${name}"?`)) {
+                const mockToDelete = mockData[category].find(m => m.name === name);
                 mockData[category] = mockData[category].filter(m => m.name !== name);
                 localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
+                
+                // Delete from IndexedDB
+                if (mockToDelete) {
+                    openDB().then(db => {
+                        const transaction = db.transaction('mocks', 'readwrite');
+                        const store = transaction.objectStore('mocks');
+                        store.delete(mockToDelete.id);
+                    });
+                }
                 displayMocks();
             }
         }
@@ -215,6 +270,10 @@
         // Initialize
         displayMocks();
     </script>
+    <footer class="bg-gray-800 text-white py-6 mt-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>Developed by Akash Chaudhary with <span class="text-red-500">❤️</span></p>
+        </div>
+    </footer>
 </body>
 </html>
-
