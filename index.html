@@ -150,23 +150,20 @@
         const mockData = {
             prelims: JSON.parse(localStorage.getItem('mockData_prelims')) || [],
             mains: JSON.parse(localStorage.getItem('mockData_mains')) || [],
-            sectional: JSON.parse(localStorage.getItem('mockData_sectional')) || [],
-            stats: JSON.parse(localStorage.getItem('mockStats')) || {
-                total: 0,
-                attempted: 0,
-                pending: 0
-            }
+            sectional: JSON.parse(localStorage.getItem('mockData_sectional')) || []
         };
 
         // Calculate statistics
-        function updateStats() {
+       function updateStats() {
+            const categories = ['prelims', 'mains', 'sectional'];
             let total = 0;
             let attempted = 0;
             
-            for (const category in mockData) {
-                total += mockData[category].length;
-                attempted += mockData[category].filter(mock => mock.attempted).length;
-            }
+            categories.forEach(category => {
+                const mocks = JSON.parse(localStorage.getItem(`mockData_${category}`)) || [];
+                total += mocks.length;
+                attempted += mocks.filter(mock => mock.attempted).length;
+            });
             
             document.getElementById('total-mocks').textContent = total;
             document.getElementById('attempted-mocks').textContent = attempted;
@@ -187,10 +184,22 @@
                 })));
             }
             
-            const recentlyViewed = allMocks
-                .filter(mock => mock.lastViewed)
-                .sort((a, b) => new Date(b.lastViewed) - new Date(a.lastViewed))
-                .slice(0, 5);
+           const recentlyViewed = [];
+            
+            ['prelims', 'mains', 'sectional'].forEach(category => {
+                const mocks = JSON.parse(localStorage.getItem(`mockData_${category}`)) || [];
+                mocks.forEach(mock => {
+                    if (mock.lastViewed) {
+                        recentlyViewed.push({
+                            ...mock,
+                            category: category
+                        });
+                    }
+                });
+            });
+
+            recentlyViewed.sort((a, b) => new Date(b.lastViewed) - new Date(a.lastViewed));
+            return recentlyViewed.slice(0, 5);
             
             if (recentlyViewed.length === 0) {
                 container.innerHTML = '<p class="text-gray-500">No recently viewed mocks</p>';
@@ -230,15 +239,10 @@
         }
 
         // Initialize the app
-        function init() {
-            // Load data from localStorage if available
-            const savedData = localStorage.getItem('mockData');
-            if (savedData) {
-                mockData = JSON.parse(savedData);
-            }
-            
+      function init() {
             updateStats();
             displayRecentlyViewed();
+            setInterval(updateStats, 2000); // Update stats every 2 seconds
         }
 
         // Create folder HTML files
