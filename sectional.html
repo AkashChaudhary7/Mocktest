@@ -97,12 +97,13 @@
         }
         
         // Open mock in new tab
-        function openMock(name, category) {
+       function openMock(name, category) {
             const mock = mockData[category].find(m => m.name === name);
-            if (mock && mock.path) {
+            if (mock && mock.content) {
                 const shouldReattempt = mock.attempted && confirm("You've already attempted this mock. Reattempt?");
                 if (!mock.attempted || shouldReattempt) {
-                    window.open(mock.path, '_blank');
+                    const blob = new Blob([mock.content], {type: 'text/html'});
+                    window.open(URL.createObjectURL(blob), '_blank');
                     mock.lastViewed = new Date().toISOString().split('T')[0];
                     mock.attempted = true;
                     localStorage.setItem('mockData', JSON.stringify(mockData));
@@ -128,7 +129,7 @@
                 
                 mockData.sectional.push({
                     name: mockName,
-                    path: mockUrl,
+                    content: fileContent,
                     attempted: false,
                     lastViewed: null
                 });
