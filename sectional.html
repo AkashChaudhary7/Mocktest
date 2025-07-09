@@ -57,24 +57,6 @@
                     <input id="mock-file" type="file" accept=".html" multiple class="hidden">
                 </div>
             </div>
-            
-            <div class="bg-white rounded-lg shadow p-6 mb-4">
-                <h3 class="text-lg font-medium mb-2">Mock Test Dashboard</h3>
-                <div class="grid grid-cols-3 gap-4">
-                    <div class="bg-indigo-50 p-4 rounded">
-                        <div class="text-indigo-600 font-bold">${mockData.stats.total}</div>
-                        <div class="text-sm">Total Mocks</div>
-                    </div>
-                    <div class="bg-green-50 p-4 rounded">
-                        <div class="text-green-600 font-bold">${mockData.stats.attempted}</div>
-                        <div class="text-sm">Attempted</div>
-                    </div>
-                    <div class="bg-amber-50 p-4 rounded">
-                        <div class="text-amber-600 font-bold">${mockData.stats.notAttempted}</div>
-                        <div class="text-sm">Not Attempted</div>
-                    </div>
-                </div>
-            </div>
             <div id="mocks-list" class="space-y-2">
                 <!-- Dynamically populated -->
             </div>
@@ -88,12 +70,7 @@
         // Load mock data
         // Initialize storage for this category only
         const mockData = {
-            [category]: JSON.parse(localStorage.getItem(`mockData_${category}`)) || [],
-            stats: JSON.parse(localStorage.getItem('mockStats')) || {
-                total: 0,
-                attempted: 0,
-                notAttempted: 0
-            }
+            [category]: JSON.parse(localStorage.getItem(`mockData_${category}`)) || []
         };
         
         // Display mocks
@@ -101,22 +78,8 @@
             const container = document.getElementById('mocks-list');
             container.innerHTML = '';
             
-            // Update stats
-            mockData.stats = {
-                total: mockData[category].length,
-                attempted: mockData[category].filter(m => m.attempted).length,
-                notAttempted: mockData[category].filter(m => !m.attempted).length
-            };
-            localStorage.setItem('mockStats', JSON.stringify(mockData.stats));
-            
             if (mockData[category].length === 0) {
-                container.innerHTML = `
-                    <div class="bg-white rounded-lg shadow p-6 mb-4">
-                        <h3 class="text-lg font-medium mb-2">Mock Test Dashboard</h3>
-                        <p class="text-gray-500">No mocks available yet</p>
-                    </div>
-                    <p class="text-gray-500 py-4">No mocks available in ${category} folder.</p>
-                `;
+                container.innerHTML = '<p class="text-gray-500 py-4">No mocks available in ${category} folder.</p>';
                 return;
             }
             
@@ -254,3 +217,4 @@
     </script>
 </body>
 </html>
+
