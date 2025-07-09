@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mains Mocks</title>
+    <title>Sectional Mocks</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -33,8 +33,8 @@
         <header class="mb-8">
             <div class="flex justify-between items-center">
                 <div>
-                    <h1 class="text-3zl font-bold text-indigo-600">Prelims Mocks</h1>
-                    <p class="text-gray-600">List of all preliminary examination tests</p>
+                    <h1 class="text-3zl font-bold text-indigo-600">Sectional Mocks</h1>
+                    <p class="text-gray-600">List of all section-wise practice tests</p>
                 </div>
                 <a href="index.html" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg">
                     Back to Home
@@ -66,12 +66,12 @@
 
     <script>
         // Initialize with current category
-        const category = 'mains';
+        const category = 'sectional';
         
         // Load mock data
         // Initialize storage for this category only
         const mockData = {
-            [category]: JSON.parse(localStorage.getItem(`mockData_${category}`)) || []
+            [category]: JSON.parse(localStorage.getItem(`mockData_sectional`)) || []
         };
         
         // Display mocks
