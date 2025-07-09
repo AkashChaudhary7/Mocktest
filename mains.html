@@ -1,3 +1,11 @@
+These changes will:
+1. Store the actual HTML content in localStorage rather than just a Blob URL
+2. Recreate the Blob URL when opening the file to avoid the "file not found" error
+3. Maintain all the same functionality but with more reliable file handling
+
+The error occurred because Blob URLs are temporary and were being lost between page loads. By storing the actual content, we can recreate the Blob URL when needed.Here is the updated HTML content after applying above edits:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -113,10 +121,11 @@
         // Open mock in new tab
         function openMock(name, category) {
             const mock = mockData[category].find(m => m.name === name);
-            if (mock && mock.path) {
+            if (mock && mock.content) {
                 const shouldReattempt = mock.attempted && confirm("You've already attempted this mock. Reattempt?");
                 if (!mock.attempted || shouldReattempt) {
-                    window.open(mock.path, '_blank');
+                    const blob = new Blob([mock.content], {type: 'text/html'});
+                    window.open(URL.createObjectURL(blob), '_blank');
                     mock.lastViewed = new Date().toISOString().split('T')[0];
                     mock.attempted = true;
                     localStorage.setItem('mockData', JSON.stringify(mockData));
@@ -138,11 +147,9 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 const fileContent = e.target.result;
-                const mockUrl = URL.createObjectURL(new Blob([fileContent], {type: 'text/html'}));
-                
                 mockData[category].push({
                     name: mockName,
-                    path: mockUrl,
+                    content: fileContent,
                     attempted: false,
                     lastViewed: null
                 });
@@ -215,4 +222,3 @@
     </script>
 </body>
 </html>
-
