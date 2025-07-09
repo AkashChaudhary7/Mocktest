@@ -38,9 +38,10 @@
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-gray-800">Available Mocks</h2>
-                <button id="upload-mock" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+                <label for="mock-file" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 cursor-pointer">
                     Upload New Mock
-                </button>
+                </label>
+                <input id="mock-file" type="file" accept=".html" class="hidden">
             </div>
             
             <div id="mocks-list" class="space-y-2">
@@ -86,32 +87,39 @@
         
         // Open mock in new tab
         function openMock(name, category) {
-            // In a real app, this would open the actual mock file
-            alert(`Opening ${name} from ${category} folder in new tab`);
-            
-            // Update last viewed date
             const mock = mockData[category].find(m => m.name === name);
-            if (mock) {
+            if (mock && mock.path) {
+                window.open(mock.path, '_blank');
                 mock.lastViewed = new Date().toISOString().split('T')[0];
                 mock.attempted = true;
                 localStorage.setItem('mockData', JSON.stringify(mockData));
                 displayMocks();
+            } else {
+                alert(`Error: Could not find mock file ${name}`);
             }
         }
         
-        // Upload new mock (simulated)
-        document.getElementById('upload-mock').addEventListener('click', function() {
-            const mockName = prompt("Enter mock name:");
-            if (mockName) {
+        // Handle file upload
+        document.getElementById('mock-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const fileContent = e.target.result;
+                const mockUrl = URL.createObjectURL(new Blob([fileContent], {type: 'text/html'}));
+                
                 mockData.sectional.push({
-                    name: mockName,
+                    name: file.name,
+                    path: mockUrl,
                     attempted: false,
                     lastViewed: null
                 });
                 localStorage.setItem('mockData', JSON.stringify(mockData));
                 displayMocks();
                 alert("Mock uploaded successfully!");
-            }
+            };
+            reader.readAsText(file);
         });
         
         // Initialize
