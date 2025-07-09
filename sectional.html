@@ -1,13 +1,3 @@
-These changes will:
-1. Fix the broken IndexedDB storage function
-2. Remove duplicate code in openMock
-3. Properly handle promise chains in file uploads
-4. Ensure transactions complete before continuing
-5. Add proper error handling for all IndexedDB operations
-
-Would you like me to explain any of these changes in more detail before applying them?Here is the updated HTML content after applying above edits:
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,13 +84,10 @@ Would you like me to explain any of these changes in more detail before applying
         
         function storeMockInIndexedDB(id, content) {
             return openDB().then(db => {
-=======
                 const transaction = db.transaction('mocks', 'readwrite');
                 const store = transaction.objectStore('mocks');
                 });
         }
-=======
-=======
             });
         }
         
@@ -171,8 +158,7 @@ Would you like me to explain any of these changes in more detail before applying
                         mock.attempted = true;
                     localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
                     displayMocks();
-=======
-=======
+
                     mock.attempted = true;
                     localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
                     displayMocks();
@@ -213,7 +199,7 @@ Would you like me to explain any of these changes in more detail before applying
                         .then(() => {
                             filesProcessed++;
                             if (filesProcessed === files.length) {
-=======
+
                         try {
                             localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
                             displayMocks();
@@ -222,7 +208,7 @@ Would you like me to explain any of these changes in more detail before applying
                             alert(`Error saving mock data: ${e.message}`);
                         }
                     }
-=======
+
                 };
                 reader.readAsText(file);
             });
