@@ -65,6 +65,9 @@
     </div>
 
     <script>
+        // Initialize with current category
+        const category = 'mains';
+        
         // Load mock data
         const mockData = JSON.parse(localStorage.getItem('mockData')) || { 
             prelims: [],
@@ -77,8 +80,8 @@
             const container = document.getElementById('mocks-list');
             container.innerHTML = '';
             
-            if (mockData.mains.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 py-4">No mocks available in mains folder.</p>';
+            if (mockData[category].length === 0) {
+                container.innerHTML = `<p class="text-gray-500 py-4">No mocks available in ${category} folder.</p>`;
                 return;
             }
             
@@ -137,7 +140,7 @@
                 const fileContent = e.target.result;
                 const mockUrl = URL.createObjectURL(new Blob([fileContent], {type: 'text/html'}));
                 
-                mockData.mains.push({
+                mockData[category].push({
                     name: mockName,
                     path: mockUrl,
                     attempted: false,
@@ -161,11 +164,11 @@
             const statusFilter = document.getElementById('filter-status').value;
             container.innerHTML = '';
             
-            let filteredMocks = mockData.mains;
+            let filteredMocks = mockData[category];
             if (statusFilter === 'attempted') {
-                filteredMocks = mockData.mains.filter(m => m.attempted);
+                filteredMocks = mockData[category].filter(m => m.attempted);
             } else if (statusFilter === 'not-attempted') {
-                filteredMocks = mockData.mains.filter(m => !m.attempted);
+                filteredMocks = mockData[category].filter(m => !m.attempted);
             }
             
             if (filteredMocks.length === 0) {
@@ -184,11 +187,11 @@
                                 ${mock.attempted ? 'Attempted' : 'Not Attempted'}
                             </span>
                             <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium mr-2" 
-                                    onclick="openMock('${mock.name}', 'sectional')">
+                                    onclick="openMock('${mock.name}', '${category}')">
                                 Open
                             </button>
                             <button class="text-red-600 hover:text-red-800 text-sm font-medium" 
-                                    onclick="deleteMock('${mock.name}', 'sectional')">
+                                    onclick="deleteMock('${mock.name}', '${category}')">
                                 Delete
                             </button>
                         </div>
