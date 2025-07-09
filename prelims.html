@@ -57,8 +57,9 @@
                     <input id="mock-file" type="file" accept=".html" multiple class="hidden">
                 </div>
             </div>
-            
-           
+            <div id="mocks-list" class="space-y-2">
+                <!-- Dynamically populated -->
+            </div>
         </div>
     </div>
 
@@ -66,13 +67,19 @@
         // Initialize with current category
         const category = 'prelims';
         
+        // Load mock data
+        // Initialize storage for this category only
+        const mockData = {
+            [category]: JSON.parse(localStorage.getItem(`mockData_${category}`)) || []
+        };
         
         // Display mocks
         function displayMocks() {
             const container = document.getElementById('mocks-list');
             container.innerHTML = '';
             
-            // Update stats
+            if (mockData[category].length === 0) {
+                container.innerHTML = '<p class="text-gray-500 py-4">No mocks available in ${category} folder.</p>';
                 return;
             }
             
@@ -210,3 +217,4 @@
     </script>
 </body>
 </html>
+
