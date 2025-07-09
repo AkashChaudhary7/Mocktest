@@ -1,54 +1,258 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Simple Mock Test WebApp with Folders</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 20px; }
-    .container { max-width: 800px; margin: auto; }
-    h1 { text-align: center; }
-    .box-grid { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
-    .box { background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; flex: 1; border: 1px solid #ccc; }
-    .mock-list { margin-top: 20px; }
-    ul { list-style-type: none; padding: 0; }
-    li { background: #fff; margin: 5px 0; padding: 10px; border-radius: 8px; }
-    a { text-decoration: none; color: #333; }
-    a:hover { text-decoration: underline; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles */
+        :root {
+            --primary: #4f46e5;
+            --secondary: #f43f5e;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f9;
+        }
+        
+        .folder-card {
+            transition: all 0.3s ease;
+        }
+        
+        .folder-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mock-item {
+            transition: all 0.2s ease;
+        }
+        
+        .mock-item:hover {
+            background-color: #e2e8f0;
+        }
+        
+        .attempted {
+            border-left: 4px solid #10b981;
+        }
+        
+        .not-attempted {
+            border-left: 4px solid #f59e0b;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Mock Test WebApp</h1>
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-indigo-600 text-white shadow-lg">
+            <div class="container mx-auto px-4 py-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold">Mock Management System</h1>
+                    <div class="relative">
+                        <button id="theme-toggle" class="p-2 rounded-full hover:bg-indigo-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-    <div class="box-grid">
-      <div class="box" onclick="showMocks('prelims')">Prelims</div>
-      <div class="box" onclick="showMocks('mains')">Mains</div>
-      <div class="box" onclick="showMocks('sectional')">Sectional</div>
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-8">
+            <!-- Dashboard Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Total Mocks</h3>
+                    <p class="text-3xl font-bold text-indigo-600" id="total-mocks">0</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Attempted</h3>
+                    <p class="text-3xl font-bold text-green-500" id="attempted-mocks">0</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Pending</h3>
+                    <p class="text-3xl font-bold text-amber-500" id="pending-mocks">0</p>
+                </div>
+            </div>
+
+            <!-- Folder Navigation -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="folder-card bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer" onclick="window.open('prelims.html', '_blank')">
+                    <div class="p-6 bg-indigo-50">
+                        <div class="flex items-center justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-center text-gray-800">Prelims</h2>
+                        <p class="text-sm text-center text-gray-600 mt-2">Preliminary examination mocks</p>
+                    </div>
+                </div>
+
+                <div class="folder-card bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer" onclick="window.open('mains.html', '_blank')">
+                    <div class="p-6 bg-indigo-50">
+                        <div class="flex items-center justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-center text-gray-800">Mains</h2>
+                        <p class="text-sm text-center text-gray-600 mt-2">Main examination mocks</p>
+                    </div>
+                </div>
+
+                <div class="folder-card bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer" onclick="window.open('sectional.html', '_blank')">
+                    <div class="p-6 bg-indigo-50">
+                        <div class="flex items-center justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-center text-gray-800">Sectional</h2>
+                        <p class="text-sm text-center text-gray-600 mt-2">Section-wise practice tests</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recently Viewed -->
+            <div class="bg-white rounded-lg shadow p-6 mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Recently Viewed</h2>
+                <div id="recently-viewed" class="space-y-2">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-6">
+            <div class="container mx-auto px-4 text-center">
+                <p>© 2023 Mock Management System. All rights reserved.</p>
+            </div>
+        </footer>
     </div>
 
-    <div class="mock-list" id="mockList"></div>
-  </div>
-
-  <script>
-    function showMocks(category) {
-      fetch(category)
-        .then(res => res.text())
-        .then(text => {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(text, 'text/html');
-          const files = Array.from(doc.links)
-                            .map(a => a.getAttribute('href'))
-                            .filter(href => href.endsWith('.html'));
-
-          let html = '<h2>' + category.toUpperCase() + ' Mocks</h2><ul>';
-          files.forEach(file => {
-            html += '<li><a href="' + category + '/' + file + '" target="_blank">' + file + '</a></li>';
-          });
-          html += '</ul>';
-          document.getElementById('mockList').innerHTML = html;
+    <script>
+        // Theme toggle functionality
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark');
         });
-    }
-  </script>
+
+        // Mock data - in a real app, this would come from a database or API
+        let mockData = {
+            prelims: [
+                { name: "Geography Mock 1", attempted: true, lastViewed: "2023-10-15" },
+                { name: "History Mock 2", attempted: false, lastViewed: "2023-10-10" }
+            ],
+            mains: [
+                { name: "Essay Writing Practice", attempted: true, lastViewed: "2023-10-12" },
+                { name: "GS Paper 1 Mock", attempted: false, lastViewed: null }
+            ],
+            sectional: [
+                { name: "Quantitative Aptitude", attempted: true, lastViewed: "2023-10-05" },
+                { name: "Logical Reasoning", attempted: false, lastViewed: null }
+            ]
+        };
+
+        // Calculate statistics
+        function updateStats() {
+            let total = 0;
+            let attempted = 0;
+            
+            for (const category in mockData) {
+                total += mockData[category].length;
+                attempted += mockData[category].filter(mock => mock.attempted).length;
+            }
+            
+            document.getElementById('total-mocks').textContent = total;
+            document.getElementById('attempted-mocks').textContent = attempted;
+            document.getElementById('pending-mocks').textContent = total - attempted;
+        }
+
+        // Display recently viewed mocks
+        function displayRecentlyViewed() {
+            const container = document.getElementById('recently-viewed');
+            container.innerHTML = '';
+            
+            // Get all mocks sorted by lastViewed date (newest first)
+            let allMocks = [];
+            for (const category in mockData) {
+                allMocks = allMocks.concat(mockData[category].map(mock => ({
+                    ...mock,
+                    category: category
+                })));
+            }
+            
+            const recentlyViewed = allMocks
+                .filter(mock => mock.lastViewed)
+                .sort((a, b) => new Date(b.lastViewed) - new Date(a.lastViewed))
+                .slice(0, 5);
+            
+            if (recentlyViewed.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No recently viewed mocks</p>';
+                return;
+            }
+            
+            recentlyViewed.forEach(mock => {
+                const mockEl = document.createElement('div');
+                mockEl.className = `mock-item p-3 rounded ${mock.attempted ? 'attempted' : 'not-attempted'}`;
+                mockEl.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span>${mock.name} (${mock.category})</span>
+                        <span class="text-sm ${mock.attempted ? 'text-green-500' : 'text-amber-500'}">
+                            ${mock.attempted ? 'Completed' : 'Pending'}
+                        </span>
+                    </div>
+                `;
+                mockEl.addEventListener('click', () => openMock(mock.name, mock.category));
+                container.appendChild(mockEl);
+            });
+        }
+
+        // Open mock in new tab
+        function openMock(name, category) {
+            // In a real app, this would open the actual mock file
+            // For demo purposes, we'll just show an alert
+            alert(`Opening ${name} from ${category} folder in new tab`);
+            
+            // Update last viewed date
+            const mock = mockData[category].find(m => m.name === name);
+            if (mock) {
+                mock.lastViewed = new Date().toISOString().split('T')[0];
+                displayRecentlyViewed();
+                updateStats();
+                localStorage.setItem('mockData', JSON.stringify(mockData));
+            }
+        }
+
+        // Initialize the app
+        function init() {
+            // Load data from localStorage if available
+            const savedData = localStorage.getItem('mockData');
+            if (savedData) {
+                mockData = JSON.parse(savedData);
+            }
+            
+            updateStats();
+            displayRecentlyViewed();
+        }
+
+        // Create folder HTML files
+        function createFolderFiles() {
+            // In a real app, you would generate these files server-side
+            // For this demo, we'll simulate it by storing the data in localStorage
+            localStorage.setItem('mockData', JSON.stringify(mockData));
+        }
+
+        // Call initialization functions
+        init();
+        createFolderFiles();
+    </script>
 </body>
 </html>
+
