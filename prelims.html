@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>prelims Mocks</title>
+    <title>Prelims Mocks</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -31,31 +31,16 @@
 <body class="min-h-screen">
     <div class="container mx-auto px-4 py-8">
         <header class="mb-8">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h1 class="text-3zl font-bold text-indigo-600">prelims Mocks</h1>
-                    <p class="text-gray-600">List of all section-wise practice tests</p>
-                </div>
-                <a href="index.html" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg">
-                    Back to Home
-                </a>
-            </div>
+            <h1 class="text-3xl font-bold text-indigo-600">Prelims Mocks</h1>
+            <p class="text-gray-600">List of all preliminary examination mocks</p>
         </header>
 
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-gray-800">Available Mocks</h2>
-                <div class="flex gap-2">
-                    <select id="filter-status" class="border rounded px-2 py-1">
-                        <option value="all">All Mocks</option>
-                        <option value="attempted">Attempted</option>
-                        <option value="not-attempted">Not Attempted</option>
-                    </select>
-                    <label for="mock-file" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 cursor-pointer">
-                        Upload New Mock
-                    </label>
-                    <input id="mock-file" type="file" accept=".html" class="hidden">
-                </div>
+                <button id="upload-mock" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+                    Upload New Mock
+                </button>
             </div>
             
             <div id="mocks-list" class="space-y-2">
@@ -65,26 +50,20 @@
     </div>
 
     <script>
-        // Initialize with current category
-        const category = 'prelims';
-        
         // Load mock data
-        // Initialize storage for this category only
-        const mockData = {
-            [category]: JSON.parse(localStorage.getItem(`mockData_prelims`)) || []
-        };
+        const mockData = JSON.parse(localStorage.getItem('mockData')) || { prelims: [] };
         
         // Display mocks
         function displayMocks() {
             const container = document.getElementById('mocks-list');
             container.innerHTML = '';
             
-            if (mockData[category].length === 0) {
-                container.innerHTML = `<p class="text-gray-500 py-4">No mocks available in ${category} folder.</p>`;
+            if (mockData.prelims.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 py-4">No mocks available in prelims folder.</p>';
                 return;
             }
             
-            mockData[category].forEach(mock => {
+            mockData.prelims.forEach(mock => {
                 const mockEl = document.createElement('div');
                 mockEl.className = `mock-item p-3 rounded ${mock.attempted ? 'attempted' : 'not-attempted'}`;
                 mockEl.innerHTML = `
@@ -94,13 +73,9 @@
                             <span class="text-sm ${mock.attempted ? 'text-green-500' : 'text-amber-500'} mr-4">
                                 ${mock.attempted ? 'Attempted' : 'Not Attempted'}
                             </span>
-                            <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium mr-2" 
-                                    onclick="openMock('${mock.name}', '${category}')">
+                            <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium" 
+                                    onclick="openMock('${mock.name}', 'prelims')">
                                 Open
-                            </button>
-                            <button class="text-red-600 hover:text-red-800 text-sm font-medium" 
-                                    onclick="deleteMock('${mock.name}', '${category}')">
-                                Delete
                             </button>
                         </div>
                     </div>
@@ -111,105 +86,37 @@
         
         // Open mock in new tab
         function openMock(name, category) {
+            // In a real app, this would open the actual mock file
+            alert(`Opening ${name} from ${category} folder in new tab`);
+            
+            // Update last viewed date
             const mock = mockData[category].find(m => m.name === name);
-            if (mock && mock.content) {
-                const shouldReattempt = mock.attempted && confirm("You've already attempted this mock. Reattempt?");
-                if (!mock.attempted || shouldReattempt) {
-                    const blob = new Blob([mock.content], {type: 'text/html'});
-                    window.open(URL.createObjectURL(blob), '_blank');
-                    mock.lastViewed = new Date().toISOString().split('T')[0];
-                    mock.attempted = true;
-                    localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
-                    displayMocks();
-                }
-            } else {
-                alert(`Error: Could not find mock file ${name}`);
-            }
-        }
-        
-        // Handle file upload
-        document.getElementById('mock-file').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const mockName = prompt("Enter a name for this mock test:", file.name.replace('.html', ''));
-            if (!mockName) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const fileContent = e.target.result;
-                mockData[category].push({
-                    name: mockName,
-                    content: fileContent,
-                    attempted: false,
-                    lastViewed: null
-                });
-                localStorage.setItem(`mockData_${category}`, JSON.stringify(mockData[category]));
-                displayMocks();
-                alert("Mock uploaded successfully!");
-            };
-            reader.readAsText(file);
-        });
-        
-        // Filter mocks by status
-        document.getElementById('filter-status').addEventListener('change', function() {
-            displayMocks();
-        });
-
-        // Updated displayMocks with filtering
-        function displayMocks(filter = 'all') {
-            const container = document.getElementById('mocks-list');
-            const statusFilter = document.getElementById('filter-status').value;
-            container.innerHTML = '';
-            
-            let filteredMocks = mockData[category];
-            if (statusFilter === 'attempted') {
-                filteredMocks = mockData[category].filter(m => m.attempted);
-            } else if (statusFilter === 'not-attempted') {
-                filteredMocks = mockData[category].filter(m => !m.attempted);
-            }
-            
-            if (filteredMocks.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 py-4">No mocks match your filter.</p>';
-                return;
-            }
-            
-            filteredMocks.forEach(mock => {
-                const mockEl = document.createElement('div');
-                mockEl.className = `mock-item p-3 rounded ${mock.attempted ? 'attempted' : 'not-attempted'}`;
-                mockEl.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <span>${mock.name}</span>
-                        <div>
-                            <span class="text-sm ${mock.attempted ? 'text-green-500' : 'text-amber-500'} mr-4">
-                                ${mock.attempted ? 'Attempted' : 'Not Attempted'}
-                            </span>
-                            <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium mr-2" 
-                                    onclick="openMock('${mock.name}', '${category}')">
-                                Open
-                            </button>
-                            <button class="text-red-600 hover:text-red-800 text-sm font-medium" 
-                                    onclick="deleteMock('${mock.name}', '${category}')">
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(mockEl);
-            });
-        }
-
-        // Delete mock
-        function deleteMock(name, category) {
-            if (confirm(`Are you sure you want to delete "${name}"?`)) {
-                mockData[category] = mockData[category].filter(m => m.name !== name);
+            if (mock) {
+                mock.lastViewed = new Date().toISOString().split('T')[0];
+                mock.attempted = true;
                 localStorage.setItem('mockData', JSON.stringify(mockData));
                 displayMocks();
             }
         }
-
+        
+        // Upload new mock (simulated)
+        document.getElementById('upload-mock').addEventListener('click', function() {
+            const mockName = prompt("Enter mock name:");
+            if (mockName) {
+                mockData.prelims.push({
+                    name: mockName,
+                    attempted: false,
+                    lastViewed: null
+                });
+                localStorage.setItem('mockData', JSON.stringify(mockData));
+                displayMocks();
+                alert("Mock uploaded successfully!");
+            }
+        });
+        
         // Initialize
         displayMocks();
     </script>
 </body>
 </html>
+
