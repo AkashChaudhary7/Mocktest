@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simple Mock Test WebApp</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 20px; }
+    .container { max-width: 800px; margin: auto; }
+    h1 { text-align: center; }
+    .box-grid { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+    .box { background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; flex: 1; }
+    .dashboard { background: #dff0d8; border-radius: 10px; padding: 10px; margin: 20px 0; }
+    .mock-list { margin-top: 20px; }
+    .mock { background: #fff; margin-bottom: 10px; padding: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mock Test WebApp</h1>
+
+    <div class="dashboard" id="summary">
+      Mocks: 0 | Attempted: 0 | Unattempted: 0
+    </div>
+
+    <div class="box-grid">
+      <div class="box" onclick="showMocks('Prelims')">Prelims</div>
+      <div class="box" onclick="showMocks('Mains')">Mains</div>
+      <div class="box" onclick="showMocks('Sectional')">Sectional</div>
+    </div>
+
+    <div class="mock-list" id="mockList"></div>
+  </div>
+
+  <script>
+    const mocks = {
+      Prelims: [{ name: 'Mock 1', attempted: false }, { name: 'Mock 2', attempted: true }],
+      Mains: [{ name: 'Mock A', attempted: false }],
+      Sectional: []
+    };
+
+    function showMocks(category) {
+      const list = mocks[category];
+      let html = `<h2>${category} Mocks</h2>`;
+      list.forEach((mock, i) => {
+        html += \`<div class='mock'>\${mock.name} - \${mock.attempted ? 'Attempted' : 'Unattempted'} 
+        <button onclick="markAttempted('\${category}', \${i})">Mark Attempted</button></div>\`;
+      });
+      document.getElementById('mockList').innerHTML = html;
+      updateSummary();
+    }
+
+    function markAttempted(category, index) {
+      mocks[category][index].attempted = true;
+      showMocks(category);
+    }
+
+    function updateSummary() {
+      let total = 0, attempted = 0;
+      for (const cat in mocks) {
+        mocks[cat].forEach(m => {
+          total++;
+          if (m.attempted) attempted++;
+        });
+      }
+      const unattempted = total - attempted;
+      document.getElementById('summary').innerText = \`Mocks: \${total} | Attempted: \${attempted} | Unattempted: \${unattempted}\`;
+    }
+
+    updateSummary();
+  </script>
+</body>
+</html>
