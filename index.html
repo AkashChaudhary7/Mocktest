@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simple Mock Test WebApp with Folders</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 20px; }
+    .container { max-width: 800px; margin: auto; }
+    h1 { text-align: center; }
+    .box-grid { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+    .box { background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; flex: 1; border: 1px solid #ccc; }
+    .mock-list { margin-top: 20px; }
+    ul { list-style-type: none; padding: 0; }
+    li { background: #fff; margin: 5px 0; padding: 10px; border-radius: 8px; }
+    a { text-decoration: none; color: #333; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mock Test WebApp</h1>
+
+    <div class="box-grid">
+      <div class="box" onclick="showMocks('prelims')">Prelims</div>
+      <div class="box" onclick="showMocks('mains')">Mains</div>
+      <div class="box" onclick="showMocks('sectional')">Sectional</div>
+    </div>
+
+    <div class="mock-list" id="mockList"></div>
+  </div>
+
+  <script>
+    function showMocks(category) {
+      fetch(category)
+        .then(res => res.text())
+        .then(text => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(text, 'text/html');
+          const files = Array.from(doc.links)
+                            .map(a => a.getAttribute('href'))
+                            .filter(href => href.endsWith('.html'));
+
+          let html = '<h2>' + category.toUpperCase() + ' Mocks</h2><ul>';
+          files.forEach(file => {
+            html += '<li><a href="' + category + '/' + file + '" target="_blank">' + file + '</a></li>';
+          });
+          html += '</ul>';
+          document.getElementById('mockList').innerHTML = html;
+        });
+    }
+  </script>
+</body>
+</html>
