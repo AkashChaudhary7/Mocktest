@@ -1,3 +1,5 @@
+// script.js
+
 document.addEventListener('DOMContentLoaded', () => {
             
     // --- CORE CONFIGURATION & DATA ---
@@ -54,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const correctAudio = document.getElementById('correct-sound');
     const incorrectAudio = document.getElementById('incorrect-sound');
 
-
     // --- GENERAL & UI MANAGEMENT ---
     
     const saveData = () => {
@@ -86,7 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (targetSectionId === 'whiteboard-section') {
-                setCanvasSize(); 
+                // Ensure canvas is resized when shown
+                setTimeout(setCanvasSize, 50); 
             } else if (targetSectionId === 'student-manager-section') {
                 filterStudentsByClass(currentFilter); 
             }
@@ -109,8 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     window.addEventListener('click', (event) => {
-        if (event.target === studentModal) {
-            closeModal(studentModal);
+        if (event.target === studentModal || event.target === passwordModal) {
+            closeModal(event.target);
         }
     });
 
@@ -405,6 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('whiteboard-section');
         const controls = document.querySelector('.whiteboard-controls');
         
+        // This recalculates the canvas size based on its parent container
         canvas.width = container.clientWidth;
         canvas.height = container.clientHeight - controls.offsetHeight;
         
@@ -500,17 +503,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- QUIZ LOGIC ---
     
-    const scienceQuiz = [
-        { question: "Which organelle is the powerhouse of the cell?", options: ["Ribosome", "Nucleus", "Mitochondria", "Cell Wall"], answer: "Mitochondria" },
-        { question: "What is the unit of electric current?", options: ["Volt", "Ohm", "Ampere", "Watt"], answer: "Ampere" },
-        { question: "Which metal is liquid at room temperature?", options: ["Gold", "Silver", "Mercury", "Copper"], answer: "Mercury" },
-        { question: "What process do plants use to make food?", options: ["Respiration", "Transpiration", "Fermentation", "Photosynthesis"], answer: "Photosynthesis" },
-        { question: "What is the chemical symbol for table salt?", options: ["KCl", "H2O", "NaCl", "CO2"], answer: "NaCl" },
-        { question: "What is the hardest natural substance on Earth?", options: ["Iron", "Quartz", "Diamond", "Tungsten"], answer: "Diamond" }
-    ];
+    // scienceQuizData is now available globally from quiz-data.js
+    let availableQuestions = [];
+    let usedQuestionIds = [];
+    let currentQuestion = null;
+
 
     let quizState = {
-        currentQuestionIndex: 0,
+        questionCount: 0,
         score: 0,
         timerSeconds: 30,
         intervalId: null
@@ -525,7 +525,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     const resetQuiz = () => {
-        quizState.currentQuestionIndex = 0;
+        // Reset the pool to include all questions
+        availableQuestions = [...scienceQuizData];
+        usedQuestionIds = [];
+        currentQuestion = null;
+        
+        quizState.questionCount = 0;
         quizState.score = 0;
         clearInterval(quizState.intervalId);
         quizTimer.textContent = '30';
@@ -545,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bgmAudio.volume = 0.4; 
         bgmAudio.play().catch(e => console.log("BGM Playback blocked: " + e));
         
-        loadQuestion(quizState.currentQuestionIndex);
+        loadRandomQuestion();
     };
 
     const startTimer = () => {
@@ -562,28 +567,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 tickAudio.play();
             } else if (quizState.timerSeconds <= 0) {
                 clearInterval(quizState.intervalId);
-                handleAnswer(null); 
+                handleAnswer(null); // Timeout
                 tickAudio.pause();
             } else {
                 quizTimer.style.color = 'gold';
             }
         }, 1000);
     };
-
-    const loadQuestion = (index) => {
-        if (index >= scienceQuiz.length) {
+    
+    const loadRandomQuestion = () => {
+        if (availableQuestions.length === 0) {
             endQuiz();
             return;
         }
-        
-        const q = scienceQuiz[index];
-        questionNumber.textContent = `Question ${index + 1} / ${scienceQuiz.length}`;
-        questionText.textContent = q.question;
+
+        // 1. Pick a random index from the available questions
+        const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+        currentQuestion = availableQuestions[randomIndex];
+
+        // 2. Remove the question from the available pool and add to used IDs
+        availableQuestions.splice(randomIndex, 1);
+        usedQuestionIds.push(currentQuestion.id);
+
+        quizState.questionCount++;
+        questionNumber.textContent = `Question ${quizState.questionCount}`;
+        questionText.textContent = currentQuestion.question;
         quizOptions.innerHTML = '';
         quizFeedback.classList.add('hidden');
         startTimer();
 
-        q.options.forEach(option => {
+        currentQuestion.options.forEach(option => {
             const btn = document.createElement('button');
             btn.className = 'option-btn';
             btn.textContent = option;
@@ -597,8 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bgmAudio.pause();
         tickAudio.pause();
 
-        const currentQ = scienceQuiz[quizState.currentQuestionIndex];
-        const isCorrect = selectedOption === currentQ.answer;
+        const isCorrect = selectedOption === currentQuestion.answer;
 
         document.querySelectorAll('#quiz-options .option-btn').forEach(btn => btn.disabled = true);
         
@@ -609,8 +621,6 @@ document.addEventListener('DOMContentLoaded', () => {
             quizFeedback.style.color = 'var(--secondary-color)';
             if (button) button.classList.add('correct');
             quizState.score += 1;
-            
-
         } else {
             incorrectAudio.play();
             quizFeedback.textContent = selectedOption ? "❌ INCORRECT! The correct answer is highlighted." : "⏳ TIME IS UP!";
@@ -618,22 +628,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (button) button.classList.add('incorrect');
             
             document.querySelectorAll('#quiz-options .option-btn').forEach(btn => {
-                if (btn.textContent === currentQ.answer) {
+                if (btn.textContent === currentQuestion.answer) {
                     btn.classList.add('correct');
                 }
             });
         }
         
         setTimeout(() => {
-            quizState.currentQuestionIndex++;
-            loadQuestion(quizState.currentQuestionIndex);
+            loadRandomQuestion(); 
         }, 3000); 
     };
 
     const endQuiz = () => {
         bgmAudio.pause();
         clearInterval(quizState.intervalId);
-        questionText.textContent = `Quiz Finished! Your Score: ${quizState.score} out of ${scienceQuiz.length}.`;
+        questionText.textContent = `Quiz Finished! Your Score: ${quizState.score} out of ${quizState.questionCount}.`;
         questionNumber.textContent = `Great Job!`;
         quizOptions.innerHTML = '';
         quizFeedback.classList.add('hidden');
